@@ -55,7 +55,6 @@ app.get('/api/todos', (req, res) => {
 });
 
 app.post('/api/todos', (req, res) => {
-  console.log('req.body', req.body);
   if (!req.body.text) {
     handleError(res, "Invalid user input", "Must provide a text.", 400);
   }
@@ -74,19 +73,28 @@ app.post('/api/todos', (req, res) => {
 app.get('/api/todos/:id', (req, res) => {
   const todo = todos.find(todo => todo.id === req.params.id);
   if (!todo) {
-    handleError(res, err.message, "Failed to get todo.");
+    handleError(res, 'item not found', "Failed to get todo.");
   } else {
     res.status(200).json(todo);
+  }
+});
+
+app.put('/api/todos/:id/toggle', (req, res) => {
+  const index = todos.findIndex(todo => todo.id === req.params.id);
+  if (index === -1) {
+    handleError(res, 'item not found', "Failed to toggle todo.");
+  } else {
+    todos[index].isCompleted = !todos[index].isCompleted;
+    res.status(200).json(todos[index]);
   }
 });
 
 app.put('/api/todos/:id', (req, res) => {
   const index = todos.findIndex(todo => todo.id === req.params.id);
   if (index === -1) {
-    handleError(res, err.message, "Failed to update todo.");
+    handleError(res, 'item not found', "Failed to update todo.");
   } else {
     todos[index].text = req.params.text;
-    todos[index].modifiedDate = new Date();
     res.status(200).json(todos[index]);
   }
 });
@@ -94,7 +102,7 @@ app.put('/api/todos/:id', (req, res) => {
 app.delete('/api/todos/:id', (req, res) => { 
   const index = todos.findIndex(todo => todo.id === req.params.id);
   if (index === -1) {
-    handleError(res, err.message, "Failed to update todo.");
+    handleError(res, 'item not found', "Failed to update todo.");
   } else {
     const todo = todos[index];
     todos.splice(index, 1);
